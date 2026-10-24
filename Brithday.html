@@ -1,0 +1,573 @@
+<!DOCTYPE html>
+<html lang="id">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Happy Birthday, My Favorite Person ❤️</title>
+    
+    <!-- Tailwind CSS untuk Layout & Responsivitas -->
+    <script src="https://cdn.tailwindcss.com"></script>
+    
+    <!-- Google Fonts: Playfair Display (Elegan) & Lora (Sederhana/Klasik) -->
+    <link href="https://fonts.googleapis.com/css2?family=Playfair+Display:ital,wght@0,400;0,600;0,700;1,400&family=Lora:ital,wght@0,400;0,500;1,400&display=swap" rel="stylesheet">
+    
+    <!-- FontAwesome untuk Ikon -->
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    
+    <!-- Canvas Confetti untuk efek kejutan -->
+    <script src="https://cdn.jsdelivr.net/npm/canvas-confetti@1.6.0/dist/confetti.browser.min.js"></script>
+
+    <script>
+        tailwind.config = {
+            theme: {
+                extend: {
+                    colors: {
+                        'soft-pink': '#ffe4e6',
+                        'soft-cream': '#fff9f9',
+                        'romantic-red': '#e11d48',
+                        'text-dark': '#4a4a4a',
+                    },
+                    fontFamily: {
+                        'title': ['"Playfair Display"', 'serif'],
+                        'body': ['"Lora"', 'serif'],
+                    }
+                }
+            }
+        }
+    </script>
+
+    <style>
+        /* Base Styles & Background */
+        body {
+            background: linear-gradient(135deg, #fff9f9 0%, #ffe4e6 100%);
+            color: #4a4a4a;
+            overflow-x: hidden;
+            scroll-behavior: smooth;
+        }
+
+        /* Smooth Scrollbar */
+        ::-webkit-scrollbar { width: 8px; }
+        ::-webkit-scrollbar-track { background: #fff9f9; }
+        ::-webkit-scrollbar-thumb { background: #fda4af; border-radius: 4px; }
+        ::-webkit-scrollbar-thumb:hover { background: #fb7185; }
+
+        /* Custom Animations */
+        @keyframes pulse-soft {
+            0%, 100% { transform: scale(1); }
+            50% { transform: scale(1.05); }
+        }
+        .animate-pulse-soft { animation: pulse-soft 2s infinite ease-in-out; }
+
+        @keyframes float-up {
+            0% { transform: translateY(0) scale(1); opacity: 0; }
+            10% { opacity: 0.8; }
+            90% { opacity: 0.8; }
+            100% { transform: translateY(-100vh) scale(1.5) rotate(360deg); opacity: 0; }
+        }
+        .floating-heart {
+            position: fixed;
+            bottom: -50px;
+            color: #ff8fa3;
+            pointer-events: none;
+            z-index: 0;
+            opacity: 0;
+        }
+
+        /* Glassmorphism Panel */
+        .glass-panel {
+            background: rgba(255, 255, 255, 0.6);
+            backdrop-filter: blur(12px);
+            -webkit-backdrop-filter: blur(12px);
+            border: 1px solid rgba(255, 255, 255, 0.8);
+            box-shadow: 0 8px 32px 0 rgba(255, 182, 193, 0.2);
+        }
+
+        /* Polaroid Effect */
+        .polaroid {
+            background: #fff;
+            padding: 12px 12px 40px 12px;
+            box-shadow: 0 10px 25px rgba(0,0,0,0.05);
+            transition: all 0.4s ease;
+            cursor: pointer;
+            position: relative;
+        }
+        .polaroid:nth-child(odd) { transform: rotate(-3deg); }
+        .polaroid:nth-child(even) { transform: rotate(2deg); }
+        .polaroid:hover {
+            transform: scale(1.05) rotate(0deg);
+            box-shadow: 0 15px 35px rgba(0,0,0,0.1);
+            z-index: 10;
+        }
+
+        /* Timeline Line */
+        .timeline-container::before {
+            content: '';
+            position: absolute;
+            left: 24px;
+            top: 0;
+            bottom: 0;
+            width: 2px;
+            background: #fda4af;
+            border-radius: 2px;
+        }
+        @media (min-width: 768px) {
+            .timeline-container::before { left: 50%; transform: translateX(-50%); }
+        }
+
+        /* Scroll Reveal Effect */
+        .reveal {
+            opacity: 0;
+            transform: translateY(40px);
+            transition: all 0.8s cubic-bezier(0.5, 0, 0, 1);
+        }
+        .reveal.active {
+            opacity: 1;
+            transform: translateY(0);
+        }
+
+        /* Typing cursor */
+        .cursor::after {
+            content: '|';
+            animation: blink 1s infinite;
+            color: #e11d48;
+        }
+        @keyframes blink { 0%, 100% { opacity: 1; } 50% { opacity: 0; } }
+
+        /* Premium Glow Effect */
+        .glow-effect {
+            box-shadow: 0 0 25px rgba(251, 113, 133, 0.4);
+        }
+    </style>
+</head>
+<body class="font-body antialiased relative">
+
+    <!-- Audio Player Latar Belakang -->
+    <!-- ================= EDIT MUSIK DI SINI ================= -->
+    <!-- Ganti 'src' dengan link lagu romantis kalian (mp3) -->
+    <audio id="bg-music" loop>
+        <source src="C:\Users\Vhey\Downloads\Apa ya\Apa ya\LANY - you! (SPOTISAVER).mp3" type="audio/mpeg">
+    </audio>
+
+    <!-- Tombol Kontrol Musik (Floating) -->
+    <button id="music-btn" class="fixed bottom-6 right-6 z-50 bg-white/80 backdrop-blur text-pink-500 p-4 rounded-full shadow-lg hover:scale-110 transition-transform hidden">
+        <i class="fas fa-music"></i>
+    </button>
+
+    <!-- LOADING SCREEN -->
+    <div id="loader" class="fixed inset-0 bg-soft-pink z-[100] flex flex-col items-center justify-center transition-opacity duration-700">
+        <i class="fas fa-heart text-5xl text-romantic-red animate-pulse-soft"></i>
+        <p class="font-title mt-4 text-xl text-gray-700">Loading magic...</p>
+    </div>
+
+    <!-- OPENING SCREEN -->
+    <div id="opening-screen" class="fixed inset-0 bg-soft-cream z-[90] flex flex-col items-center justify-center transition-transform duration-1000 ease-in-out">
+        <div class="text-center p-6 max-w-lg">
+            <h1 class="font-title text-3xl md:text-5xl mb-8 text-gray-800 leading-tight">
+                Something special is <br> waiting for you...
+            </h1>
+            <button id="open-gift-btn" class="font-title bg-romantic-red text-white px-8 py-4 rounded-full text-lg shadow-[0_4px_15px_rgba(225,29,72,0.4)] hover:bg-pink-700 hover:scale-105 hover:shadow-[0_6px_20px_rgba(225,29,72,0.6)] transition-all duration-300">
+                Open Your Gift 🎁
+            </button>
+        </div>
+    </div>
+
+    <!-- MAIN CONTENT (Sembunyi sebelum kado dibuka) -->
+    <main id="main-content" class="hidden relative z-10">
+        
+        <!-- SECTION 1: BIRTHDAY HERO -->
+        <section class="min-h-screen flex flex-col items-center justify-center pt-20 pb-10 px-4 text-center">
+            <div class="reveal max-w-3xl mx-auto flex flex-col items-center">
+                <p class="font-title text-xl text-pink-500 mb-2 italic">Today is all about you.</p>
+                
+                <!-- ================= EDIT NAMA PACAR DI SINI ================= -->
+                <h1 class="font-title text-5xl md:text-7xl font-bold text-gray-800 mb-8 leading-tight">
+                    Happy Birthday, <br> <span class="text-romantic-red">Sayangku ❤️</span>
+                </h1>
+
+                <!-- ================= EDIT FOTO UTAMA DI SINI ================= -->
+                <div class="relative p-2 bg-white rounded-3xl glow-effect rotate-[-1deg] hover:rotate-0 transition-transform duration-500">
+                    <img src="c:\Users\Ilham Maulana Rizky\Downloads\WhatsApp Image 2026-08-08 at 17.19.56 (1).jpeg" 
+                         alt="Our Photo" 
+                         class="w-64 h-64 md:w-80 md:h-80 object-cover rounded-2xl">
+                    <div class="absolute -bottom-4 -right-4 bg-white p-3 rounded-full shadow-lg">
+                        <i class="fas fa-sparkles text-yellow-400 text-2xl"></i>
+                    </div>
+                </div>
+            </div>
+            
+            <div class="mt-16 animate-bounce text-pink-400">
+                <i class="fas fa-chevron-down text-2xl"></i>
+            </div>
+        </section>
+
+        <!-- SECTION 2: OUR MEMORIES -->
+        <section class="py-20 px-6 max-w-6xl mx-auto">
+            <div class="text-center mb-16 reveal">
+                <h2 class="font-title text-4xl md:text-5xl text-gray-800">Our Memories 📸</h2>
+                <p class="mt-3 text-gray-600">Every moment with you is my favorite.</p>
+            </div>
+            
+            <div class="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 gap-10 md:gap-8 justify-items-center">
+                <!-- ================= EDIT FOTO & CAPTION DI SINI ================= -->
+                
+                <!-- Foto 1 -->
+                <div class="polaroid w-full max-w-sm reveal" onclick="openLightbox(this.querySelector('img').src)">
+                    <img src="C:\Users\Vhey\Downloads\Apa ya\Apa ya\WhatsApp Image 2026-08-08 at 17.19.56 (1).jpeg" alt="Memory 1" class="w-full h-64 object-cover mb-4">
+                    <p class="font-title text-center text-lg text-gray-700">Pertama Kali kita Fotbar,Masih malu malu jir<p>
+                </div>
+
+                <!-- Foto 2 -->
+                <div class="polaroid w-full max-w-sm reveal delay-100" onclick="openLightbox(this.querySelector('img').src)">
+                    <img src="C:\Users\Vhey\Downloads\Apa ya\Apa ya\WhatsApp Image 2026-08-08 at 17.19.56 (2).jpeg" alt="Memory 2" class="w-full h-64 object-cover mb-4">
+                    <p class="font-title text-center text-lg text-gray-700">Photobooth Pertama Kita</p>
+                </div>
+
+                <!-- Foto 3 -->
+                <div class="polaroid w-full max-w-sm reveal delay-200" onclick="openLightbox(this.querySelector('img').src)">
+                    <img src="C:\Users\Vhey\Downloads\Apa ya\Apa ya\WhatsApp Image 2026-08-08 at 17.19.56.jpeg" alt="Memory 3" class="w-full h-64 object-cover mb-4">
+                    <p class="font-title text-center text-lg text-gray-700">Dan Ini foto kitaa paaling gemees,luucu</p>
+                </div>
+            </div>
+        </section>
+
+        <!-- SECTION 3: A LITTLE MESSAGE -->
+        <section class="py-20 px-6">
+            <div class="max-w-3xl mx-auto glass-panel p-8 md:p-12 rounded-3xl reveal">
+                <h2 class="font-title text-3xl md:text-4xl text-romantic-red mb-6 text-center">A Little Message 💌</h2>
+                
+                <!-- ================= EDIT PESAN DI SINI ================= -->
+                <!-- Pesan asli disembunyikan dan akan diketik oleh JavaScript -->
+                <div id="message-container" class="font-body text-lg md:text-xl text-gray-700 leading-relaxed text-justify md:text-center min-h-[150px]">
+                    <!-- Text will be typed here -->
+                </div>
+                <!-- Pesan mentah yang akan dibaca oleh sistem JS (Edit teks di bawah ini) -->
+                <div id="raw-message" class="hidden">
+                    Terima kasih sudah menjadi seseorang yang begitu berarti dalam hidupku. Semoga di ulang tahunmu kali ini, semua hal baik datang kepadamu. Semoga kamu selalu bahagia, sehat, dan bisa mencapai semua impianmu. Happy birthday, sayang. ❤️
+                </div>
+            </div>
+        </section>
+
+        <!-- SECTION 4: OUR TIMELINE -->
+        <section class="py-20 px-6 bg-white/30">
+            <div class="max-w-4xl mx-auto">
+                <div class="text-center mb-16 reveal">
+                    <h2 class="font-title text-4xl text-gray-800">Our Timeline 🫶</h2>
+                </div>
+
+                <div class="relative timeline-container">
+                    
+                    <!-- ================= EDIT TIMELINE DI SINI ================= -->
+                    <!-- Timeline Item 1 -->
+                    <div class="reveal flex flex-col md:flex-row items-center justify-between mb-12 relative w-full left-timeline">
+                        <div class="hidden md:block w-5/12"></div>
+                        <div class="absolute left-6 md:left-1/2 w-6 h-6 rounded-full bg-romantic-red border-4 border-white shadow transform md:-translate-x-1/2 flex items-center justify-center z-10"></div>
+                        <div class="w-full md:w-5/12 pl-16 md:pl-0 md:text-right pr-0 md:pr-8">
+                            <h3 class="font-title text-xl font-bold text-gray-800">The day we met</h3>
+                            <p class="text-pink-500 text-sm mb-2">Awal mula semuanya</p>
+                            <p class="text-gray-600">Hari di mana hidupku berubah menjadi lebih berwarna karena kehadiranmu.</p>
+                        </div>
+                    </div>
+
+                    <!-- Timeline Item 2 -->
+                    <div class="reveal flex flex-col md:flex-row items-center justify-between mb-12 relative w-full right-timeline">
+                        <div class="w-full md:w-5/12 pl-16 md:pl-8 md:text-left order-2 md:order-1">
+                            <h3 class="font-title text-xl font-bold text-gray-800">Our first photo</h3>
+                            <p class="text-pink-500 text-sm mb-2">Momen yang terabadikan</p>
+                            <p class="text-gray-600">Meskipun canggung, tapi itu salah satu foto paling berharga buatku.</p>
+                        </div>
+                        <div class="absolute left-6 md:left-1/2 w-6 h-6 rounded-full bg-romantic-red border-4 border-white shadow transform md:-translate-x-1/2 flex items-center justify-center z-10 order-1 md:order-2"></div>
+                        <div class="hidden md:block w-5/12 order-3"></div>
+                    </div>
+
+                    <!-- Timeline Item 3 -->
+                    <div class="reveal flex flex-col md:flex-row items-center justify-between mb-12 relative w-full left-timeline">
+                        <div class="hidden md:block w-5/12"></div>
+                        <div class="absolute left-6 md:left-1/2 w-6 h-6 rounded-full bg-romantic-red border-4 border-white shadow transform md:-translate-x-1/2 flex items-center justify-center z-10"></div>
+                        <div class="w-full md:w-5/12 pl-16 md:pl-0 md:text-right pr-0 md:pr-8">
+                            <h3 class="font-title text-xl font-bold text-gray-800">Our favorite moment</h3>
+                            <p class="text-pink-500 text-sm mb-2">Tertawa bersama</p>
+                            <p class="text-gray-600">Semua hal sederhana terasa luar biasa jika dilakukan bersamamu.</p>
+                        </div>
+                    </div>
+
+                    <!-- Timeline Item 4 -->
+                    <div class="reveal flex flex-col md:flex-row items-center justify-between relative w-full right-timeline">
+                        <div class="w-full md:w-5/12 pl-16 md:pl-8 md:text-left order-2 md:order-1">
+                            <h3 class="font-title text-2xl font-bold text-romantic-red">Today — Your Birthday ❤️</h3>
+                            <p class="text-gray-600 mt-2">Hari spesial untuk manusia paling spesial.</p>
+                        </div>
+                        <div class="absolute left-6 md:left-1/2 w-8 h-8 rounded-full bg-gradient-to-r from-pink-400 to-red-500 border-4 border-white shadow-lg transform md:-translate-x-1/2 flex items-center justify-center z-10 order-1 md:order-2">
+                            <i class="fas fa-heart text-white text-xs"></i>
+                        </div>
+                        <div class="hidden md:block w-5/12 order-3"></div>
+                    </div>
+
+                </div>
+            </div>
+        </section>
+
+        <!-- SECTION 5: BIRTHDAY WISHES -->
+        <section class="py-20 px-6 max-w-5xl mx-auto">
+            <div class="text-center mb-12 reveal">
+                <h2 class="font-title text-4xl text-gray-800">Birthday Wish ✨</h2>
+            </div>
+            
+            <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
+                <!-- ================= EDIT HARAPAN DI SINI ================= -->
+                <div class="glass-panel p-6 rounded-2xl flex items-center gap-4 reveal">
+                    <div class="bg-pink-100 p-3 rounded-full text-pink-500"><i class="fas fa-smile-beam text-xl"></i></div>
+                    <p class="text-lg text-gray-700">Semoga senyummu selalu ada.</p>
+                </div>
+                <div class="glass-panel p-6 rounded-2xl flex items-center gap-4 reveal delay-100">
+                    <div class="bg-pink-100 p-3 rounded-full text-pink-500"><i class="fas fa-star text-xl"></i></div>
+                    <p class="text-lg text-gray-700">Semoga semua impianmu tercapai.</p>
+                </div>
+                <div class="glass-panel p-6 rounded-2xl flex items-center gap-4 reveal">
+                    <div class="bg-pink-100 p-3 rounded-full text-pink-500"><i class="fas fa-sun text-xl"></i></div>
+                    <p class="text-lg text-gray-700">Semoga hari-harimu dipenuhi kebahagiaan.</p>
+                </div>
+                <div class="glass-panel p-6 rounded-2xl flex items-center gap-4 reveal delay-100">
+                    <div class="bg-pink-100 p-3 rounded-full text-pink-500"><i class="fas fa-infinity text-xl"></i></div>
+                    <p class="text-lg text-gray-700">Dan semoga kita punya lebih banyak cerita bersama. ❤️</p>
+                </div>
+            </div>
+        </section>
+
+        <!-- SECTION 6: FINAL -->
+        <section class="py-32 px-4 text-center bg-white/40 border-t border-white/50">
+            <div class="reveal">
+                <h2 class="font-title text-4xl md:text-6xl text-gray-800 mb-4">Once again, Happy Birthday ❤️</h2>
+                <p class="text-xl text-gray-600 mb-12 italic font-title">Thank you for being part of my story.</p>
+                
+                <button id="surprise-btn" class="font-title bg-gradient-to-r from-pink-400 to-romantic-red text-white px-10 py-5 rounded-full text-xl shadow-[0_5px_20px_rgba(225,29,72,0.4)] hover:scale-105 transition-transform duration-300 relative overflow-hidden group">
+                    <span class="relative z-10">One More Surprise 🎁</span>
+                    <div class="absolute inset-0 bg-white/20 transform -translate-x-full group-hover:translate-x-full transition-transform duration-700"></div>
+                </button>
+            </div>
+        </section>
+
+    </main>
+
+    <!-- LIGHTBOX MODAL UNTUK FOTO -->
+    <div id="lightbox" class="fixed inset-0 bg-black/90 z-[100] hidden flex items-center justify-center opacity-0 transition-opacity duration-300">
+        <button id="close-lightbox" class="absolute top-6 right-6 text-white text-4xl hover:text-pink-400 transition-colors">&times;</button>
+        <img id="lightbox-img" src="" alt="Enlarged Photo" class="max-w-[90%] max-h-[90vh] object-contain rounded-xl shadow-2xl scale-95 transition-transform duration-300">
+    </div>
+
+    <!-- SURPRISE MODAL -->
+    <div id="surprise-modal" class="fixed inset-0 bg-black/60 backdrop-blur-sm z-[100] hidden flex items-center justify-center opacity-0 transition-opacity duration-300 px-4">
+        <div class="bg-white rounded-3xl p-8 md:p-12 max-w-md text-center transform scale-90 transition-transform duration-300 shadow-2xl relative">
+            <button id="close-surprise" class="absolute top-4 right-5 text-gray-400 hover:text-gray-700 text-2xl">&times;</button>
+            <i class="fas fa-envelope-open-heart text-6xl text-romantic-red mb-6 animate-bounce"></i>
+            <h3 class="font-title text-3xl text-gray-800 mb-4">I Love You!</h3>
+            <p class="text-lg text-gray-600">I hope this little website made your day a little more special. ❤️</p>
+        </div>
+    </div>
+
+    <!-- JAVASCRIPT KONTROL -->
+    <script>
+        // --- 1. HANDLING LOADER ---
+        window.addEventListener('load', () => {
+            const loader = document.getElementById('loader');
+            setTimeout(() => {
+                loader.style.opacity = '0';
+                setTimeout(() => loader.style.display = 'none', 700);
+            }, 1500); // Tampil 1.5 detik
+        });
+
+        // --- 2. OPENING SCREEN & MUSIC ---
+        const openGiftBtn = document.getElementById('open-gift-btn');
+        const openingScreen = document.getElementById('opening-screen');
+        const mainContent = document.getElementById('main-content');
+        const bgMusic = document.getElementById('bg-music');
+        const musicBtn = document.getElementById('music-btn');
+        const musicIcon = musicBtn.querySelector('i');
+        let isMusicPlaying = false;
+
+        openGiftBtn.addEventListener('click', () => {
+            // Animasi Halaman Terbuka
+            openingScreen.style.transform = 'translateY(-100vh)';
+            
+            setTimeout(() => {
+                openingScreen.style.display = 'none';
+                mainContent.style.display = 'block';
+                musicBtn.classList.remove('hidden');
+                
+                // Putar Musik
+                bgMusic.play().then(() => {
+                    isMusicPlaying = true;
+                }).catch(e => console.log("Autoplay dicegah browser, perlu interaksi manual."));
+                
+                // Lempar Confetti Pembuka
+                fireConfetti();
+                
+                // Mulai Animasi Hati
+                startFloatingHearts();
+                
+                // Cek elemen yang terlihat untuk scroll reveal
+                checkReveal();
+            }, 800);
+        });
+
+        // Tombol Toggle Musik
+        musicBtn.addEventListener('click', () => {
+            if (isMusicPlaying) {
+                bgMusic.pause();
+                musicIcon.classList.remove('fa-music');
+                musicIcon.classList.add('fa-volume-mute');
+            } else {
+                bgMusic.play();
+                musicIcon.classList.remove('fa-volume-mute');
+                musicIcon.classList.add('fa-music');
+            }
+            isMusicPlaying = !isMusicPlaying;
+        });
+
+        // --- 3. SCROLL REVEAL ANIMATION ---
+        const reveals = document.querySelectorAll('.reveal');
+        
+        function checkReveal() {
+            const windowHeight = window.innerHeight;
+            const elementVisible = 100;
+            
+            reveals.forEach(reveal => {
+                const elementTop = reveal.getBoundingClientRect().top;
+                if (elementTop < windowHeight - elementVisible) {
+                    reveal.classList.add('active');
+                    
+                    // Jika section pesan terlihat, jalankan efek ketik (hanya 1x)
+                    if(reveal.querySelector('#message-container') && !isTypingStarted) {
+                        isTypingStarted = true;
+                        typeMessage();
+                    }
+                }
+            });
+        }
+        window.addEventListener('scroll', checkReveal);
+
+        // --- 4. TYPING EFFECT UNTUK SURAT ---
+        const messageContainer = document.getElementById('message-container');
+        const rawMessage = document.getElementById('raw-message').innerText.trim();
+        let i = 0;
+        let isTypingStarted = false;
+
+        function typeMessage() {
+            messageContainer.classList.add('cursor');
+            messageContainer.innerHTML = ''; // bersihkan teks
+            
+            function typeWriter() {
+                if (i < rawMessage.length) {
+                    messageContainer.innerHTML += rawMessage.charAt(i);
+                    i++;
+                    setTimeout(typeWriter, 50); // Kecepatan ketik (50ms)
+                } else {
+                    messageContainer.classList.remove('cursor'); // Hapus kursor setelah selesai
+                }
+            }
+            setTimeout(typeWriter, 500); // Jeda sebelum mulai ngetik
+        }
+
+        // --- 5. FLOATING HEARTS ANIMATION ---
+        function startFloatingHearts() {
+            setInterval(() => {
+                const heart = document.createElement('i');
+                heart.classList.add('fas', 'fa-heart', 'floating-heart');
+                
+                // Posisi & ukuran random
+                heart.style.left = Math.random() * 100 + 'vw';
+                heart.style.fontSize = (Math.random() * 15 + 10) + 'px';
+                
+                // Durasi animasi random (8-15 detik)
+                const duration = Math.random() * 7 + 8;
+                heart.style.animation = `float-up ${duration}s linear forwards`;
+                
+                document.body.appendChild(heart);
+                
+                // Hapus elemen setelah animasi selesai agar tidak menumpuk
+                setTimeout(() => {
+                    heart.remove();
+                }, duration * 1000);
+            }, 800); // Munculkan hati setiap 0.8 detik
+        }
+
+        // --- 6. CANVAS CONFETTI EFFECT ---
+        function fireConfetti() {
+            var count = 200;
+            var defaults = { origin: { y: 0.7 } };
+
+            function fire(particleRatio, opts) {
+                confetti(Object.assign({}, defaults, opts, {
+                    particleCount: Math.floor(count * particleRatio)
+                }));
+            }
+
+            fire(0.25, { spread: 26, startVelocity: 55 });
+            fire(0.2, { spread: 60 });
+            fire(0.35, { spread: 100, decay: 0.91, scalar: 0.8 });
+            fire(0.1, { spread: 120, startVelocity: 25, decay: 0.92, scalar: 1.2 });
+            fire(0.1, { spread: 120, startVelocity: 45 });
+        }
+
+        // --- 7. LIGHTBOX GALLERY ---
+        const lightbox = document.getElementById('lightbox');
+        const lightboxImg = document.getElementById('lightbox-img');
+        const closeLightbox = document.getElementById('close-lightbox');
+
+        window.openLightbox = function(src) {
+            lightboxImg.src = src;
+            lightbox.classList.remove('hidden');
+            // Sedikit delay agar transisi opacity bekerja
+            setTimeout(() => {
+                lightbox.classList.remove('opacity-0');
+                lightboxImg.classList.remove('scale-95');
+                lightboxImg.classList.add('scale-100');
+            }, 10);
+        }
+
+        function closeLightboxFunc() {
+            lightbox.classList.add('opacity-0');
+            lightboxImg.classList.remove('scale-100');
+            lightboxImg.classList.add('scale-95');
+            setTimeout(() => {
+                lightbox.classList.add('hidden');
+            }, 300);
+        }
+
+        closeLightbox.addEventListener('click', closeLightboxFunc);
+        lightbox.addEventListener('click', (e) => {
+            if(e.target === lightbox) closeLightboxFunc();
+        });
+
+        // --- 8. FINAL SURPRISE MODAL ---
+        const surpriseBtn = document.getElementById('surprise-btn');
+        const surpriseModal = document.getElementById('surprise-modal');
+        const closeSurprise = document.getElementById('close-surprise');
+        const surpriseContent = surpriseModal.querySelector('div');
+
+        surpriseBtn.addEventListener('click', () => {
+            fireConfetti();
+            surpriseModal.classList.remove('hidden');
+            setTimeout(() => {
+                surpriseModal.classList.remove('opacity-0');
+                surpriseContent.classList.remove('scale-90');
+                surpriseContent.classList.add('scale-100');
+            }, 10);
+        });
+
+        function closeSurpriseFunc() {
+            surpriseModal.classList.add('opacity-0');
+            surpriseContent.classList.remove('scale-100');
+            surpriseContent.classList.add('scale-90');
+            setTimeout(() => {
+                surpriseModal.classList.add('hidden');
+            }, 300);
+        }
+
+        closeSurprise.addEventListener('click', closeSurpriseFunc);
+        surpriseModal.addEventListener('click', (e) => {
+            if(e.target === surpriseModal) closeSurpriseFunc();
+        });
+
+    </script>
+</body>
+</html>
